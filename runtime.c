@@ -37,6 +37,7 @@
 #else
 #include <sys/time.h>
 #include <unistd.h>
+#include <termios.h> //termios, TCSANOW, ECHO, ICANON
 #endif
 #include "stat.h"
 #include "readdir.h"
@@ -815,7 +816,33 @@ GETIN() {
         else
             A = 0;
 #else
+        /* From: http://stackoverflow.com/a/1798833/471795 */
+        static struct termios oldt, newt;
+
+        /*tcgetattr gets the parameters of the current terminal
+        STDIN_FILENO will tell tcgetattr that it should write the settings
+        of stdin to oldt*/
+        tcgetattr( STDIN_FILENO, &oldt);
+        /*now the settings will be copied*/
+        newt = oldt;
+
+        /*ICANON normally takes care that one line at a time will be processed
+        that means it will return if it sees a "\n" or an EOF or an EOL*/
+        /* Also, disable echo (simulated below) */
+        newt.c_lflag &= ~(ICANON | ECHO);
+
+        /*Those new settings will be set to STDIN
+        TCSANOW tells tcsetattr to change attributes immediately. */
+        tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+
+        /*Notice that EOF is also turned off in non-canonical mode*/
         A = getchar();
+        if (A == 255) { A = 4; } // map actual EOF to 4
+        /* Simulate echo */
+        if (A != 0 && A != 4) { putchar(A); }
+
+        /*restore the old settings*/
+        tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
 #endif
         if (A=='\n') A = '\r';
         C = 0;

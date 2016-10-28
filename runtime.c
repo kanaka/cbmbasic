@@ -838,8 +838,10 @@ GETIN() {
         /*Notice that EOF is also turned off in non-canonical mode*/
         A = getchar();
         if (A == 255) { A = 4; } // map actual EOF to 4
+
+        // jdm: this doesn't match C64 behavior
         /* Simulate echo */
-        if (A != 0 && A != 4) { putchar(A); }
+        //if (A != 0 && A != 4) { putchar(A); }
 
         /*restore the old settings*/
         tcsetattr( STDIN_FILENO, TCSANOW, &oldt);

@@ -535,7 +535,8 @@ printf("CHROUT: %d @ %x,%x,%x,%x\n", A, a, b, c, d);
                     left_cursor();
                     break;
                 case '"':
-                    kernal_quote = 1;
+                    // jdm: this doesn't match C64 behavior
+                    //kernal_quote = 1;
                     // fallthrough
                 default:
                     putchar(A);
